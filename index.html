@@ -39,6 +39,13 @@ button{cursor:pointer;border:0;border-radius:13px;padding:12px 16px;font-weight:
 footer{position:fixed;bottom:0;left:0;right:0;background:#101720ed;border-top:1px solid var(--line);padding:9px 14px calc(9px + env(safe-area-inset-bottom));text-align:center;color:#8e9caf;font-size:11px;backdrop-filter:blur(12px)}
 @media(min-width:600px){.dexgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{padding:24px}.encounter{padding:25px}}
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cambra GO">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
 <header><div class="brand">🌍 CAMBRA <span>GO</span></div><div class="counter" id="headerDex">CAMBRADEX<br><b>0 / 151 descobertas</b></div></header>
@@ -355,4 +362,5 @@ document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
 }));
 updateStats();renderDex();renderCollection();renderBattleUI();
 </script>
+<script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}</script>
 </body></html>
