@@ -1,0 +1,22 @@
+CAMBRA GO — versão com ilustrações integradas
+
+Como testar:
+1. Extrai a pasta cambra_go.
+2. Abre index.html num navegador moderno.
+3. Mantém a pasta assets ao lado de index.html; não movas nem renomeies os ficheiros das criaturas.
+
+Conteúdo:
+- index.html: protótipo atualizado.
+- assets/creatures/001.webp a 151.webp: recortes da imagem fornecida, organizados pelo número da grelha.
+
+Alterações desta versão:
+- Ilustrações do poster integradas nos encontros, CambraDex, coleção e Raids.
+- Contador da CambraDex corrigido para 151.
+- Criaturas lendárias 147–151 removidas dos encontros selvagens; aparecem nas Raids.
+- Rodapé duplicado removido.
+- Associação indevida dos números 111–113 a Luís Bernardo de Almeida removida; as figuras históricas lendárias não são duplicadas nessa linha.
+
+Nota importante:
+As ilustrações foram recortadas do poster e associadas pela posição/número da grelha. Os nomes existentes no protótipo foram mantidos. Como os nomes do poster e os nomes atuais do protótipo não coincidem em todos os números, algumas ilustrações podem não corresponder semanticamente ao nome mostrado. É necessária uma validação visual e editorial da CambraDex antes de publicar a versão final.
+
+Este é ainda um protótipo local HTML. Não inclui ainda contas, sincronização na nuvem, GPS ou multijogador online.

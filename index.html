@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10151d">
+<title>Cambra GO — CambraDex</title>
+<style>
+:root{--bg:#0e1219;--panel:#171e29;--panel2:#202a38;--ink:#f4f6fb;--muted:#aab5c5;--lime:#b9e769;--gold:#ffd166;--line:#2b3748;--blue:#6cc8ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1a2b3a 0,#0e1219 48%);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+header{position:sticky;top:0;z-index:5;background:#101720ed;backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:900;font-size:21px;letter-spacing:.4px}.brand span{color:var(--lime)}.counter{font-size:12px;color:var(--muted);text-align:right}
+main{max-width:760px;margin:auto;padding:16px 14px 100px}.hero{background:linear-gradient(135deg,#243a4a,#182331 60%,#273b2d);border:1px solid #385064;border-radius:22px;padding:18px;position:relative;overflow:hidden}
+.kicker{color:var(--lime);font-weight:800;font-size:11px;letter-spacing:1.5px;text-transform:uppercase}.hero h1{font-size:27px;line-height:1.05;margin:8px 0}.hero p{color:#c4d0dc;margin:0 0 14px;font-size:14px;max-width:430px}.stats{display:flex;gap:8px;flex-wrap:wrap}.stat{background:#0b1219a8;border:1px solid #ffffff20;padding:8px 11px;border-radius:12px;font-size:12px}.stat b{display:block;font-size:17px;color:white}
+.tabs{display:flex;gap:7px;margin:15px 0;overflow:auto}.tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:10px 13px;border-radius:12px;font-weight:750;white-space:nowrap}.tab.active{background:var(--lime);color:#18220c;border-color:var(--lime)}
+.page{display:none}.page.active{display:block}.section-title{font-size:18px;font-weight:850;margin:17px 0 9px}.muted{color:var(--muted);font-size:13px}
+.encounter{background:linear-gradient(160deg,#202c3a,#141b25);border:1px solid #344356;border-radius:22px;padding:18px;text-align:center;min-height:290px}
+.creature{width:190px;height:170px;margin:5px auto 8px;display:grid;place-items:center;position:relative;border-radius:20px;background:linear-gradient(145deg,#263b53,#121d2a);border:2px solid #52677f;box-shadow:0 14px 30px #0008;overflow:hidden}
+.creature img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 4px #0006)}
+.face{display:none}.shiny .creature{background:radial-gradient(circle at 40% 30%,#fff9,transparent 42%),linear-gradient(145deg,#fff0a6,#ff74c8 55%,#69e5ff);box-shadow:0 0 26px #ffe66d88,inset 0 0 0 3px #ffffff88,0 14px 30px #0008}
+.shiny .face{filter:drop-shadow(0 0 8px #fff)}.shine-label{display:inline-block;background:linear-gradient(90deg,#ffdf70,#ff8cda,#83e8ff);color:#17131c;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:900;letter-spacing:.8px}
+.name{font-size:23px;font-weight:900;margin:7px 0 0}.type{font-size:13px;color:var(--muted)}.actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+button{cursor:pointer;border:0;border-radius:13px;padding:12px 16px;font-weight:850;font-size:14px;background:var(--lime);color:#17200d}.secondary{background:#2b394a;color:var(--ink);border:1px solid #42536a}.disabled{opacity:.45;pointer-events:none}
+.notice{margin-top:11px;color:var(--muted);font-size:12px;min-height:18px}.dexgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.dexcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:11px;min-width:0}.dexcard .mini{height:96px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(140deg,#27394d,#172331);margin-bottom:8px;overflow:hidden}.dexcard .mini img{width:100%;height:100%;object-fit:contain}.dexcard.shinycard .mini{background:linear-gradient(140deg,#fff0a6,#ff83c9,#74e6ff)}.dexcard b{display:block;font-size:13px}.dexcard small{color:var(--muted)}.num{font-size:10px;color:var(--lime);font-weight:900;letter-spacing:.7px}
+.filter{width:100%;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:white;margin:7px 0 12px;font-size:14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}.pill{font-size:10px;padding:4px 7px;border-radius:20px;background:#2d3a4a;color:#d8e4f2}
+
+.battle-panel{background:linear-gradient(145deg,#202c3a,#141b25);border:1px solid #344356;border-radius:18px;padding:15px;margin:10px 0}
+.battle-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.battle-controls select{flex:1;min-width:150px;background:#202a38;color:white;border:1px solid #43536a;border-radius:12px;padding:11px}
+.xpbar{height:8px;background:#0b1119;border-radius:20px;overflow:hidden;margin:7px 0}
+.xpbar span{display:block;height:100%;background:linear-gradient(90deg,#8bdc62,#d5f47a);width:0}
+.raidgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.raidcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px}
+.raidboss{height:112px;text-align:center;padding:5px;background:linear-gradient(140deg,#33455c,#202a38);border-radius:12px;margin:8px 0;overflow:hidden}.raidboss img{height:100%;max-width:100%;object-fit:contain}
+.result{background:#0d141d;border:1px solid #344356;border-radius:12px;padding:12px;margin-top:10px;color:#dce8f4;font-size:13px;min-height:42px}
+.empty{padding:20px;border:1px dashed #43536a;border-radius:15px;text-align:center;color:var(--muted)}
+footer{position:fixed;bottom:0;left:0;right:0;background:#101720ed;border-top:1px solid var(--line);padding:9px 14px calc(9px + env(safe-area-inset-bottom));text-align:center;color:#8e9caf;font-size:11px;backdrop-filter:blur(12px)}
+@media(min-width:600px){.dexgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{padding:24px}.encounter{padding:25px}}
+</style>
+</head>
+<body>
+<header><div class="brand">🌍 CAMBRA <span>GO</span></div><div class="counter" id="headerDex">CAMBRADEX<br><b>0 / 151 descobertas</b></div></header>
+<main>
+<section class="hero">
+ <div class="kicker">Explora • Descobre • Coleciona</div>
+ <h1>O mundo de<br>Cambra espera por ti.</h1>
+ <p>Descobre criaturas inspiradas em Vale de Cambra, regista-as na CambraDex e procura as raras versões Shiny.</p>
+ <div class="stats"><div class="stat"><b id="caughtCount">0</b>capturadas</div><div class="stat"><b id="shinyCount">0</b>Shiny</div><div class="stat"><b>1 / 150</b>odd Shiny</div></div>
+</section>
+<nav class="tabs">
+ <button class="tab active" data-tab="explore">Explorar</button><button class="tab" data-tab="dex">CambraDex</button><button class="tab" data-tab="collection">Coleção</button><button class="tab" data-tab="battles">Batalhas & Raids</button>
+</nav>
+<section class="page active" id="explore">
+ <div class="section-title">Encontro selvagem</div>
+ <p class="muted">Toca em “Procurar criatura” para iniciar um encontro. Cada encontro tem uma probabilidade independente de 1 em 150 de ser Shiny.</p>
+ <div class="encounter" id="encounter">
+  <div class="muted">Ainda não encontraste nenhuma criatura.</div>
+  <div style="font-size:70px;margin:12px">🌿</div><b>Prepara-te para explorar!</b>
+  <div class="actions"><button onclick="findCreature()">Procurar criatura</button></div>
+ </div>
+ <div class="notice" id="encounterNotice">A tua aventura começa aqui.</div>
+ <div class="section-title">Como funciona</div>
+ <div class="dexcard"><b>✨ Caça aos Shiny</b><small> A probabilidade é de 1/150 em cada encontro. A versão Shiny fica registada separadamente na tua coleção.</small></div>
+</section>
+<section class="page" id="dex">
+ <div class="section-title">CambraDex <span class="pill">#001–#151</span></div>
+ <p class="muted">A numeração segue a ordem inicial da lista de criaturas fornecida.</p>
+ <input class="filter" id="dexSearch" placeholder="Pesquisar criatura ou categoria…" oninput="renderDex()">
+ <div class="dexgrid" id="dexGrid"></div>
+</section>
+<section class="page" id="collection">
+ <div class="section-title">A tua coleção</div>
+ <p class="muted">As criaturas capturadas e as respetivas variantes Shiny aparecem aqui.</p>
+ <div class="row"><span class="muted">Mostrar</span><select class="filter" style="width:auto;margin:0" id="collectionFilter" onchange="renderCollection()"><option value="all">Todas</option><option value="shiny">Só Shiny</option></select></div>
+ <div class="dexgrid" id="collectionGrid" style="margin-top:12px"></div>
+</section>
+<section class="page" id="battles">
+ <div class="section-title">⚔️ Batalhas</div>
+ <p class="muted">Escolhe uma criatura da tua coleção. As vitórias e derrotas dão experiência; as vitórias dão mais XP.</p>
+ <div class="battle-panel">
+  <b>Equipa de combate</b>
+  <div class="battle-controls" style="margin-top:10px"><select id="fighterSelect"></select><button onclick="startBattle()">Combater</button></div>
+  <div class="result" id="battleResult">Escolhe uma criatura e inicia a tua primeira batalha.</div>
+ </div>
+ <div class="section-title">📍 Pontos de Batalha — Raids</div>
+ <p class="muted">Visita os pontos especiais para enfrentar bosses. Vence a Raid para teres uma oportunidade de captura.</p>
+ <div class="raidgrid" id="raidGrid"></div>
+ <div class="result" id="raidResult">As Raids aguardam por ti.</div>
+</section>
+</main>
+<footer>CAMBRA GO • Protótipo inicial • Progresso guardado neste dispositivo</footer>
+<script>
+const creatures = [
+["Mumuga","Terra","Básico","🐮"],["Bezerrão","Terra","Evolução 1","🐂"],["Arouquinator","Terra","Evolução 2","🐃"],
+["Lobicho","Rocha · Serra da Freita","Básico","🐺"],["Freitalobo","Rocha · Serra da Freita","Evolução 1","🐺"],["Lobissera","Rocha · Serra da Freita","Evolução 2","🐺"],
+["Mascarito","Fantasma · teatro","Básico","👻"],["Comediante","Fantasma · teatro","Evolução 1","🎭"],["Dramaturgo","Fantasma · teatro","Evolução 2","👑"],
+["Folclorinha","Fada · rancho folclórico","Básico","🧚"],["Viravira","Fada · rancho folclórico","Evolução 1","💃"],["Rancheira","Fada · rancho folclórico","Evolução 2","✨"],
+["Tamborico","Som · banda filarmónica","Básico","🥁"],["Bombardino","Som · banda filarmónica","Evolução 1","🎺"],["Filarmónix","Som · banda filarmónica","Evolução 2","🎼"],
+["Golito","Desporto","Básico","⚽"],["Golaço","Desporto","Evolução 1","🥅"],["Goleador","Desporto","Evolução 2","🏆"],
+["Pedrito","Rocha · castros","Básico","🗿"],["Castrão","Rocha · castros","Evolução 1","🏛️"],["Castelossauro","Rocha · castros","Evolução 2","🏰"],
+["Fresinha","Metal · fábrica","Básico","⚙️"],["Fresadela","Metal · fábrica","Evolução 1","🔩"],["Fresauro","Metal · fábrica","Evolução 2","🦾"],
+["Gotinha","Normal · lacticínios","Básico","💧"],["Bilhão","Normal · lacticínios","Evolução 1","🥛"],["Queijotauro","Normal · lacticínios","Evolução 2","🧀"],
+["Mangueirito","Fogo/Água · bombeiros","Básico","🚒"],["Bombeirão","Fogo/Água · bombeiros","Evolução 1","🧑‍🚒"],["Socorrex","Fogo/Água · bombeiros","Evolução 2","🚨"],
+["Lapisito","Inseto/Psíquico · escola FORESP","Básico","🐛"],["Cadernulo","Inseto/Psíquico · escola FORESP","Evolução 1","📘"],["Diplomeleta","Inseto/Psíquico · escola FORESP","Evolução 2","🦋"],
+["Foguetinho","Fogo/Voador · romarias","Básico","🎇"],["Foguetão","Fogo/Voador · romarias","Evolução 1","🚀"],["Arraialume","Fogo/Voador · romarias","Evolução 2","🎆"],
+["Trutita","Água · rio Caima","Básico","🐟"],["Trutanço","Água · rio Caima","Evolução 1","🐠"],["Leviatruta","Água · rio Caima","Evolução 2","🐉"],
+["Paquimito","Metal/Água · paquímetro","Básico","🦀"],["Calibrante","Metal/Água · paquímetro","Evolução 1","📏"],["Micrometrão","Metal/Água · paquímetro","Evolução 2","🦾"],
+["Lanita","Ovelha","Básico","🐑"],["Lanzudo","Carneiro","Evolução 1","🐏"],
+["Sardão","Terra · único","Único","🦎"],["Tamancão","Normal · único","Único","👞"],
+["Leitãozito","Porco","Básico","🐖"],["Porcalhão","Porco","Evolução 1","🐗"],
+["Cogumini","Cogumelo","Básico","🍄"],["Míscaro","Cogumelo","Evolução 1","🍄"]
+].map((c,i)=>({id:i+1,name:c[0],type:c[1],stage:c[2],emoji:c[3]}));
+creatures.push({id:51,name:"Freitão Ancestral",type:"Raro · Rocha/Voador",stage:"Raid Rara",emoji:"🦅"},{id:52,name:"Caimalume",type:"Raro · Água/Luz",stage:"Raid Rara",emoji:"🐉"},{id:53,name:"Aroucaço",type:"Raro · Terra/Fada",stage:"Raid Rara",emoji:"🦌"},{id:54,name:"Fornalhix",type:"Raro · Fogo/Metal",stage:"Raid Rara",emoji:"🔥"});
+
+// Novas espécies regionais, números 055–146
+creatures.push(
+{id:55,name:"Freitapico",type:"Rocha/Voador · Serra da Freita",stage:"Básico",emoji:"🦅"},
+{id:56,name:"Pedravento",type:"Rocha/Voador · Serra da Freita",stage:"Evolução 1",emoji:"🌬️"},
+{id:57,name:"Granifalcão",type:"Rocha/Voador · Serra da Freita",stage:"Evolução 2",emoji:"🦅"},
+{id:58,name:"Caimalim",type:"Água · rio Caima",stage:"Básico",emoji:"💧"},
+{id:59,name:"Ribeironda",type:"Água · rio Caima",stage:"Evolução 1",emoji:"🌊"},
+{id:60,name:"Caimaçor",type:"Água · rio Caima",stage:"Evolução 2",emoji:"🐟"},
+{id:61,name:"Moinhito",type:"Água · moinhos",stage:"Básico",emoji:"⚙️"},
+{id:62,name:"Moinhágua",type:"Água · moinhos",stage:"Evolução 1",emoji:"🌀"},
+{id:63,name:"Moinharrão",type:"Água · moinhos",stage:"Evolução 2",emoji:"🌪️"},
+{id:64,name:"Eirito",type:"Terra · eiras",stage:"Básico",emoji:"🌾"},
+{id:65,name:"Malhador",type:"Terra · eiras",stage:"Evolução 1",emoji:"🧺"},
+{id:66,name:"Eirassauro",type:"Terra · eiras",stage:"Evolução 2",emoji:"🐂"},
+{id:67,name:"Carvalhito",type:"Planta · carvalhais",stage:"Básico",emoji:"🌱"},
+{id:68,name:"Carvalhudo",type:"Planta · carvalhais",stage:"Evolução 1",emoji:"🌳"},
+{id:69,name:"Carvalhão",type:"Planta · carvalhais",stage:"Evolução 2",emoji:"🌲"},
+{id:70,name:"Folhito",type:"Planta · bosque",stage:"Básico",emoji:"🍃"},
+{id:71,name:"Silvaflor",type:"Planta · bosque",stage:"Evolução 1",emoji:"🌺"},
+{id:72,name:"Bosquedro",type:"Planta · bosque",stage:"Evolução 2",emoji:"🌳"},
+{id:73,name:"Abelhito",type:"Inseto · apicultura",stage:"Básico",emoji:"🐝"},
+{id:74,name:"Melzão",type:"Inseto · apicultura",stage:"Evolução 1",emoji:"🍯"},
+{id:75,name:"Meliferaço",type:"Inseto · apicultura",stage:"Evolução 2",emoji:"🐝"},
+{id:76,name:"Castanhito",type:"Planta · soutos",stage:"Básico",emoji:"🌰"},
+{id:77,name:"Ouriçudo",type:"Planta · soutos",stage:"Evolução 1",emoji:"🦔"},
+{id:78,name:"Castanheirox",type:"Planta · soutos",stage:"Evolução 2",emoji:"🌳"},
+{id:79,name:"Lobagueiro",type:"Normal · aldeias",stage:"Básico",emoji:"🐕"},
+{id:80,name:"Guardaldeia",type:"Normal · aldeias",stage:"Evolução 1",emoji:"🐕‍🦺"},
+{id:81,name:"Rapozito",type:"Fogo · lendas da serra",stage:"Básico",emoji:"🦊"},
+{id:82,name:"Rapofumo",type:"Fogo · lendas da serra",stage:"Evolução 1",emoji:"🔥"},
+{id:83,name:"Rapossauro",type:"Fogo · lendas da serra",stage:"Evolução 2",emoji:"🦊"},
+{id:84,name:"Corujeco",type:"Voador · noite",stage:"Básico",emoji:"🦉"},
+{id:85,name:"Corujaluz",type:"Psíquico/Voador · noite",stage:"Evolução 1",emoji:"✨"},
+{id:86,name:"Noctuíla",type:"Psíquico/Voador · noite",stage:"Evolução 2",emoji:"🌙"},
+{id:87,name:"Soutito",type:"Planta · soutos",stage:"Básico",emoji:"🌱"},
+{id:88,name:"Ouriçola",type:"Planta · soutos",stage:"Evolução 1",emoji:"🌰"},
+{id:89,name:"Vinhito",type:"Planta · agricultura",stage:"Básico",emoji:"🍇"},
+{id:90,name:"Vindouro",type:"Planta · agricultura",stage:"Evolução 1",emoji:"🍷"},
+{id:91,name:"Milhito",type:"Planta · campos",stage:"Básico",emoji:"🌽"},
+{id:92,name:"Espigão",type:"Planta · campos",stage:"Evolução 1",emoji:"🌾"},
+{id:93,name:"Padeirito",type:"Fogo · forno tradicional",stage:"Básico",emoji:"🍞"},
+{id:94,name:"Forneiro",type:"Fogo · forno tradicional",stage:"Evolução 1",emoji:"🔥"},
+{id:95,name:"Pãodraco",type:"Fogo · forno tradicional",stage:"Evolução 2",emoji:"🥖"},
+{id:96,name:"Croniquito",type:"Normal/Psíquico · memória local",stage:"Básico",emoji:"📜"},
+{id:97,name:"Etnolume",type:"Planta/Psíquico · recolha de tradições",stage:"Evolução 1",emoji:"📖"},
+{id:98,name:"Cambriógrafo",type:"Planta/Psíquico · história de Cambra",stage:"Evolução 2",emoji:"🦉"},
+{id:99,name:"Cortantito",type:"Metal · engenho industrial",stage:"Básico",emoji:"⚙️"},
+{id:100,name:"Prensador",type:"Metal/Elétrico · invenção mecânica",stage:"Evolução 1",emoji:"🔩"},
+{id:101,name:"Arsopion",type:"Metal/Elétrico · indústria cambrense",stage:"Evolução 2",emoji:"🏭"},
+{id:102,name:"Notito",type:"Som · aprendiz de filarmónica",stage:"Básico",emoji:"🎵"},
+{id:103,name:"Maestrino",type:"Som/Psíquico · regência musical",stage:"Evolução 1",emoji:"🎼"},
+{id:104,name:"Liracambrense",type:"Som/Fada · compositor",stage:"Evolução 2",emoji:"🎺"},
+{id:105,name:"Dinamito",type:"Elétrico · primeira luz",stage:"Básico",emoji:"💡"},
+{id:106,name:"Hidrolume",type:"Água/Elétrico · força do rio",stage:"Evolução 1",emoji:"🌊"},
+{id:107,name:"Cambrovolt",type:"Elétrico/Metal · pioneiro da energia",stage:"Evolução 2",emoji:"⚡"},
+{id:108,name:"Socorrito",type:"Água · cuidado comunitário",stage:"Básico",emoji:"🩺"},
+{id:109,name:"Curandor",type:"Água/Psíquico · médico da aldeia",stage:"Evolução 1",emoji:"💧"},
+{id:110,name:"Cidadoutor",type:"Psíquico/Normal · serviço público",stage:"Evolução 2",emoji:"🏛️"},
+{id:111,name:"Mecenito",type:"Fada/Normal · generosidade",stage:"Básico",emoji:"🎁"},
+{id:112,name:"Patronato",type:"Fada/Metal · apoio às artes",stage:"Evolução 1",emoji:"🏅"},
+{id:113,name:"Benemauro",type:"Fada/Metal · legado comunitário",stage:"Evolução 2",emoji:"🌟"},
+{id:114,name:"Biciclito",type:"Metal · mobilidade",stage:"Básico",emoji:"🚲"},
+{id:115,name:"Pedalume",type:"Elétrico · mobilidade",stage:"Evolução 1",emoji:"⚡"},
+{id:116,name:"Festonito",type:"Fada · festas populares",stage:"Básico",emoji:"🎉"},
+{id:117,name:"Marchaluz",type:"Fada · festas populares",stage:"Evolução 1",emoji:"🥁"},
+{id:118,name:"Romaravilha",type:"Fada · festas populares",stage:"Evolução 2",emoji:"✨"},
+{id:119,name:"Caretito",type:"Fantasma · máscaras",stage:"Básico",emoji:"🎭"},
+{id:120,name:"Caretão",type:"Fantasma · máscaras",stage:"Evolução 1",emoji:"👺"},
+{id:121,name:"Sinoito",type:"Som · igrejas e aldeias",stage:"Básico",emoji:"🔔"},
+{id:122,name:"Sinozão",type:"Som · igrejas e aldeias",stage:"Evolução 1",emoji:"⛪"},
+{id:123,name:"Campanito",type:"Som · música popular",stage:"Básico",emoji:"🎶"},
+{id:124,name:"Cantorim",type:"Som · música popular",stage:"Evolução 1",emoji:"🎤"},
+{id:125,name:"Bailito",type:"Fada · dança tradicional",stage:"Básico",emoji:"💃"},
+{id:126,name:"Viravolta",type:"Fada · dança tradicional",stage:"Evolução 1",emoji:"🌀"},
+{id:127,name:"Ardósito",type:"Rocha · geologia",stage:"Básico",emoji:"🪨"},
+{id:128,name:"Xistauro",type:"Rocha · geologia",stage:"Evolução 1",emoji:"⛰️"},
+{id:129,name:"Nevoeiro",type:"Fantasma · neblinas da serra",stage:"Básico",emoji:"🌫️"},
+{id:130,name:"Brumassombra",type:"Fantasma · neblinas da serra",stage:"Evolução 1",emoji:"👻"},
+{id:131,name:"Orvalhito",type:"Água · fontes",stage:"Básico",emoji:"💧"},
+{id:132,name:"Fontanário",type:"Água · fontes",stage:"Evolução 1",emoji:"⛲"},
+{id:133,name:"Trilheiro",type:"Terra · caminhos antigos",stage:"Básico",emoji:"🥾"},
+{id:134,name:"Caminhante",type:"Terra · caminhos antigos",stage:"Evolução 1",emoji:"🧭"},
+{id:135,name:"Poldrito",type:"Planta · prados",stage:"Básico",emoji:"🌼"},
+{id:136,name:"Pradouro",type:"Planta · prados",stage:"Evolução 1",emoji:"🌻"},
+{id:137,name:"Vespero",type:"Inseto · campos",stage:"Básico",emoji:"🦋"},
+{id:138,name:"Borboletaço",type:"Inseto · campos",stage:"Evolução 1",emoji:"🦋"},
+{id:139,name:"Ribeirito",type:"Água · ribeiras",stage:"Básico",emoji:"🦦"},
+{id:140,name:"Lontrágua",type:"Água · ribeiras",stage:"Evolução 1",emoji:"🦦"},
+{id:141,name:"Serrito",type:"Rocha · montanha",stage:"Básico",emoji:"🐐"},
+{id:142,name:"Cabralto",type:"Rocha · montanha",stage:"Evolução 1",emoji:"🐐"},
+{id:143,name:"Faialito",type:"Planta · bosques",stage:"Básico",emoji:"🌿"},
+{id:144,name:"Faialume",type:"Planta/Fada · bosques",stage:"Evolução 1",emoji:"✨"},
+{id:145,name:"Lajedo",type:"Rocha · caminhos de pedra",stage:"Básico",emoji:"🪨"},
+{id:146,name:"Lajedraco",type:"Rocha/Dragão · caminhos de pedra",stage:"Evolução 1",emoji:"🐉"}
+);
+// Os cinco Lendários oficiais de Cambra GO: 147–151
+creatures.push(
+{id:147,name:"Trovalto",type:"Lendário · Elétrico/Rocha",stage:"Lendário · Raid",emoji:"⚡"},
+{id:148,name:"Golstrela",type:"Lendário · Água/Luz",stage:"Lendário · Raid",emoji:"🌟"},
+{id:149,name:"Caravélio",type:"Lendário · Voador/Dragão",stage:"Lendário · Raid",emoji:"🪽"},
+{id:150,name:"Alcaidrago",type:"Lendário · Dragão/Fogo",stage:"Lendário · Raid",emoji:"🐉"},
+{id:151,name:"Mecenauro",type:"Lendário · Metal/Terra",stage:"Lendário · Raid",emoji:"⚙️"}
+);
+// Inspirações históricas documentadas: criaturas ficcionais, não retratos das pessoas reais.
+const historicalLore = {
+96:"Inspirado em António Martins Ferreira: escritor e cronista ligado à memória local.",
+97:"Inspirado na recolha etnográfica e nos registos das tradições de Vale de Cambra feitos por António Martins Ferreira.",
+98:"Homenagem à obra de António Martins Ferreira sobre Vale de Cambra e o Santuário de Nossa Senhora da Saúde.",
+99:"Inspirado em Arlindo Soares de Pinho, dinamizador da indústria local.",
+100:"Evoca o engenho mecânico e a criatividade industrial de Arlindo Soares de Pinho.",
+101:"Homenagem à expansão industrial e ao legado empresarial de Arlindo Soares de Pinho.",
+102:"Inspirado em Artur Tavares de Pinho, músico desde criança na banda de Macieira de Cambra.",
+103:"Evoca o percurso autodidata de Artur Tavares de Pinho como maestro.",
+104:"Homenagem à atividade de Artur Tavares de Pinho como compositor e regente.",
+105:"Inspirado em Luiz de Sousa Moreira, pioneiro da produção de eletricidade no concelho.",
+106:"Evoca a ligação entre a energia hidráulica e o rio Caima.",
+107:"Homenagem ao pioneirismo da eletrificação em Vale de Cambra.",
+108:"Inspirado em Eduardo Manuel Martins Coelho, médico e autarca que dedicou parte da vida ao concelho.",
+109:"Evoca a dedicação à saúde e ao serviço das comunidades.",
+110:"Homenagem à ligação entre medicina, cidadania e vida pública local.",
+111:"Criatura inspirada na generosidade e no apoio à comunidade.",
+112:"Evoca o apoio à cultura, à educação e à comunidade.",
+113:"Homenagem ao legado de participação e promoção cultural."
+};
+creatures.forEach(c=>{ if(historicalLore[c.id]) c.lore=historicalLore[c.id]; });
+const colors=[["#d99a53","#7c4a2b"],["#9aa6b2","#4e5968"],["#9d73df","#543e91"],["#f19b45","#d94c51"],["#e8bd48","#347c57"],["#db4a58","#7d273c"],["#8d9b79","#4d6b4c"],["#78a9df","#35558b"]];
+let current=null;
+let saved=JSON.parse(localStorage.getItem("cambraGoSave")||'{"caught":[]}');
+function persist(){localStorage.setItem("cambraGoSave",JSON.stringify(saved));updateStats()}
+
+const raidBosses=[
+ {name:"Trovalto",emoji:"⚡",type:"Lendário · Elétrico/Rocha",level:45,rarity:"Lendária",id:147},
+ {name:"Golstrela",emoji:"🌟",type:"Lendário · Água/Luz",level:45,rarity:"Lendária",id:148},
+ {name:"Caravélio",emoji:"🪽",type:"Lendário · Voador/Dragão",level:50,rarity:"Lendária",id:149},
+ {name:"Alcaidrago",emoji:"🐉",type:"Lendário · Dragão/Fogo",level:50,rarity:"Lendária",id:150},
+ {name:"Mecenauro",emoji:"⚙️",type:"Lendário · Metal/Terra",level:50,rarity:"Lendária",id:151},
+ {name:"Aroucaço",emoji:"🦌",type:"Raro · Terra/Fada",level:28,rarity:"Rara",id:53},
+ {name:"Fornalhix",emoji:"🔥",type:"Raro · Fogo/Metal",level:32,rarity:"Rara",id:54}
+];
+function xpNeeded(level){return level>=100?0:Math.floor(60+level*level*4);}
+function gainXP(creature,amount){
+ creature.level=creature.level||1; creature.xp=creature.xp||0;
+ if(creature.level>=100)return "Nível máximo!";
+ creature.xp+=amount; let levels=0;
+ while(creature.level<100 && creature.xp>=xpNeeded(creature.level)){
+   creature.xp-=xpNeeded(creature.level); creature.level++; levels++;
+ }
+ return levels?("Subiu "+levels+" nível(is)! Agora está no nível "+creature.level+"."):"Ganhou "+amount+" XP.";
+}
+function renderBattleUI(){
+ const sel=document.getElementById("fighterSelect");
+ if(!sel)return;
+ sel.innerHTML=saved.caught.length?saved.caught.map((c,i)=>'<option value="'+i+'">'+c.name+' · Nv. '+(c.level||1)+(c.shiny?' ★ Shiny':'')+'</option>').join(""):'<option value="">Captura primeiro uma criatura</option>';
+ document.getElementById("raidGrid").innerHTML=raidBosses.map((b,i)=>'<div class="raidcard"><div class="row"><b>'+b.name+'</b><span class="pill">'+b.rarity+'</span></div><div class="raidboss"><img src="assets/creatures/'+String(b.id).padStart(3,'0')+'.webp" alt="'+b.name+'"></div><small>'+b.type+'</small><div class="row" style="margin-top:7px"><small>Nível '+b.level+'</small><button class="secondary" onclick="startRaid('+i+')">Entrar</button></div></div>').join("");
+}
+function startBattle(){
+ if(!saved.caught.length){document.getElementById("battleResult").textContent="Ainda não tens criaturas. Vai a Explorar e captura uma!";return;}
+ const i=Number(document.getElementById("fighterSelect").value), c=saved.caught[i];
+ if(!c)return;
+ const enemyLevel=Math.max(1,(c.level||1)+Math.floor(Math.random()*9)-4);
+ const power=(c.level||1)*10+Math.floor(Math.random()*80), enemy=enemyLevel*10+Math.floor(Math.random()*80);
+ const win=power>=enemy, xp=win?45+enemyLevel*5:20+enemyLevel*2;
+ const msg=gainXP(c,xp);
+ persist();renderBattleUI();renderCollection();
+ document.getElementById("battleResult").textContent=(win?"🏆 Vitória!":"🛡️ Derrota honrosa.")+" "+c.name+" (Nv. "+c.level+") enfrentou um adversário de nível "+enemyLevel+". "+msg;
+}
+function startRaid(i){
+ if(!saved.caught.length){document.getElementById("raidResult").textContent="Precisas de pelo menos uma criatura para entrar numa Raid.";return;}
+ const boss=raidBosses[i], fighter=saved.caught[Number(document.getElementById("fighterSelect").value)||0];
+ const strength=(fighter.level||1)*12+Math.floor(Math.random()*100);
+ const difficulty=boss.level*11+Math.floor(Math.random()*100);
+ if(strength<difficulty){
+   const msg=gainXP(fighter,55);
+   persist();renderBattleUI();renderCollection();
+   document.getElementById("raidResult").textContent="A Raid foi perdida contra "+boss.name+". "+fighter.name+" ganhou 55 XP por participar. "+msg;
+   return;
+ }
+ const msg=gainXP(fighter,100+boss.level*3);
+ persist();
+ const legendary=boss.rarity==="Lendária";
+ const captureChance=legendary?0.25:0.55;
+ const caught=Math.random()<captureChance;
+ if(caught){
+   saved.caught.push({id:boss.id,name:boss.name,type:boss.type,stage:"Raid",emoji:boss.emoji,shiny:false,level:boss.level,xp:0,raid:true});
+   persist();
+ }
+ renderBattleUI();renderCollection();
+ document.getElementById("raidResult").textContent="🎉 Raid vencida! "+fighter.name+" ganhou experiência. "+msg+" "+(caught?"✨ "+boss.name+" foi capturado e entrou na tua coleção!":"O boss escapou desta vez. Podes tentar novamente noutra Raid.");
+}
+
+function updateStats(){
+ const unique=new Set(saved.caught.map(x=>x.id)).size, shiny=saved.caught.filter(x=>x.shiny).length;
+ document.getElementById("caughtCount").textContent=saved.caught.length;
+ document.getElementById("shinyCount").textContent=shiny;
+ document.getElementById("headerDex").innerHTML="CAMBRADEX<br><b>"+unique+" / 151 descobertas</b>";
+}
+function findCreature(){
+ const wildCreatures=creatures.filter(c=>c.id<147);
+ const c=wildCreatures[Math.floor(Math.random()*wildCreatures.length)];
+ const shiny=Math.random()<1/150;
+ current={...c,shiny,uid:Date.now()+Math.random()};
+ const [a,b]=colors[(c.id-1)%colors.length];
+ const box=document.getElementById("encounter");
+ box.className="encounter"+(shiny?" shiny":"");
+ box.innerHTML=(shiny?'<div class="shine-label">✦ SHINY ✦</div>':'')+
+ '<div class="creature"><img src="assets/creatures/'+String(c.id).padStart(3,'0')+'.webp" alt="Ilustração de '+c.name+'"></div>'+
+ '<div class="name">'+c.name+'</div><div class="type">#'+String(c.id).padStart(3,"0")+' · '+c.type+' · '+c.stage+'</div>'+
+ '<div class="actions"><button onclick="catchCurrent()">Capturar</button><button class="secondary" onclick="findCreature()">Procurar outra</button></div>';
+ document.getElementById("encounterNotice").textContent=shiny?"✨ Um encontro raro! Encontraste uma versão Shiny.":"Uma criatura apareceu! Será que a consegues capturar?";
+}
+function catchCurrent(){
+ if(!current)return;
+ saved.caught.push({...current,level:1,xp:0});
+ persist();
+ document.getElementById("encounterNotice").textContent=current.shiny?"Shiny adicionada à coleção! ✨":"Criatura adicionada à coleção!";
+ current=null;
+ document.getElementById("encounter").innerHTML='<div style="font-size:62px;margin:20px">✅</div><b>Captura concluída!</b><p class="muted">A tua CambraDex foi atualizada.</p><div class="actions"><button onclick="findCreature()">Procurar criatura</button></div>';
+}
+function card(c, shiny=false){
+ const [a,b]=colors[(c.id-1)%colors.length], level=c.level||1, xp=c.xp||0, need=xpNeeded(level);
+ return '<div class="dexcard '+(shiny?'shinycard':'')+'"><div class="num">#'+String(c.id).padStart(3,"0")+'</div><div class="mini"><img src="assets/creatures/'+String(c.id).padStart(3,'0')+'.webp" alt="'+c.name+'"></div><b>'+c.name+(shiny?' <span style="color:#ffb8e8">★</span>':'')+'</b><small>'+c.type+' · Nv. '+level+'</small><div class="xpbar"><span style="width:'+(level>=100?100:Math.min(100,xp/need*100))+'%"></span></div><small>'+(level>=100?'NÍVEL MÁXIMO':xp+' / '+need+' XP')+'</small></div>';
+}
+function renderDex(){
+ const q=document.getElementById("dexSearch").value.toLowerCase();
+ document.getElementById("dexGrid").innerHTML=creatures.filter(c=>(c.name+" "+c.type+" "+c.stage+" "+(c.lore||"")).toLowerCase().includes(q)).map(c=>{
+ const caught=saved.caught.some(x=>x.id===c.id), shiny=saved.caught.some(x=>x.id===c.id&&x.shiny);
+ return '<div class="dexcard"><div class="num">#'+String(c.id).padStart(3,"0")+'</div><div class="mini"><img src="assets/creatures/'+String(c.id).padStart(3,'0')+'.webp" alt="Ilustração '+String(c.id).padStart(3,'0')+'"></div><b>'+(caught?c.name:'???')+'</b><small>'+(caught?c.type+' · '+c.stage:'Ainda por descobrir')+'</small>'+(caught&&c.lore?'<small style="display:block;margin-top:5px;color:#b7c6d8;line-height:1.35">'+c.lore+'</small>':'')+'<div style="margin-top:6px;font-size:11px;color:'+(shiny?'#ff9cda':'#8290a2')+'">'+(shiny?'★ Shiny descoberta':caught?'Normal descoberta':'—')+'</div></div>';
+ }).join("");
+}
+function renderCollection(){
+ const only=document.getElementById("collectionFilter").value==="shiny";
+ const list=saved.caught.filter(c=>!only||c.shiny);
+ document.getElementById("collectionGrid").innerHTML=list.length?list.map(c=>card(c,c.shiny)).join(""):'<div class="empty" style="grid-column:1/-1">Ainda não tens criaturas nesta coleção. Vai a Explorar e procura o teu primeiro encontro!</div>';
+}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));
+ document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===b.dataset.tab));
+ if(b.dataset.tab==="dex")renderDex();if(b.dataset.tab==="collection")renderCollection();if(b.dataset.tab==="battles")renderBattleUI();
+}));
+updateStats();renderDex();renderCollection();renderBattleUI();
+</script>
+</body></html>
